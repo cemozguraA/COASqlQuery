@@ -98,3 +98,16 @@ var SelectString = Data.GenerateSelectQuery().Where(a=> a.BasTarihi>=ogrenci.Bas
 var SelectString = Data.GenerateSelectQuery().Where(a=> a.BasTarihi>=ogrenci.BasTarihi || a.SoyAd==ogrenci.SoyAd).OrderBy(a=> a.SoyAd).Skip(10,20);
 //Return : with dummyTable as (select ROW_NUMBER() over( ORDER BY SoyAd ASC) as RowNumber,* from Ogrenci WHERE BasTarihi >= '2017-06-09 10:39:53' OR SoyAd = 'Aydın') select top(10) ID,Ad,SoyAd,Sınıf,BasTarihi,Okul from dummyTable WHERE RowNumber > (20)
 ```
+## UpdateExtensions
+
+- **SelectColums**
+ ```csharp
+ var updateString = Data.GenerateUpdateQuery(a => a.BasTarihi == ogrenci.BasTarihi).SelectColums(a => a.SoyAd);
+//Return : UPDATE Ogrenci SET SoyAd=@SoyAd WHERE BasTarihi = '2017-06-09 10:39:53'
+```
+
+- **RemoveColums**
+ ```csharp
+ var updateString =  Data.GenerateUpdateQuery(a => a.BasTarihi == ogrenci.BasTarihi).RemoveColums(a => a.SoyAd);
+//Return : UPDATE Ogrenci SET Ad=@Ad,Sınıf=@Sınıf,BasTarihi=@BasTarihi,Okul=@Okul WHERE BasTarihi = '2017-06-09 10:39:53'
+```
