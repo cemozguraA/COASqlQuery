@@ -58,3 +58,20 @@ var InsertString = Data.GenerateInsertQuery();
 var updateString = Data.GenerateUpdateQuery(a => a.BasTarihi == ogrenci.BasTarihi && a.Ad == ogrenci.Ad);
 //Return : UPDATE Ogrenci SET Ad=@Ad,SoyAd=@SoyAd,Sınıf=@Sınıf,BasTarihi=@BasTarihi,Okul=@Okul WHERE BasTarihi = '2017-06-09 09:37:54' AND Ad = 'Cem'
 ```
+## GenerateDeleteQuery  
+- Convert your class to delete sqlquery 
+ ```csharp
+var DeleteString = Data.GenerateDeleteQuery(a => a.BasTarihi == ogrenci.BasTarihi);
+//Return : DELETE FROM Ogrenci WHERE BasTarihi = '2017-06-09 09:46:28'
+```
+
+## GenerateSelectQuery  
+- Convert your class to select sqlquery 
+ ```csharp
+ var SelectString = Data.GenerateSelectQuery();
+//Return : SELECT * FROM Ogrenci
+
+
+ var SelectString = Data.GenerateSelectQuery(a => new { a.Ad, a.SoyAd, a.Sınıf, a.BasTarihi });
+ //Return : SELECT Ad,SoyAd,Sınıf,BasTarihi FROM Ogrenci
+```
