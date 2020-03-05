@@ -31,7 +31,7 @@ COASqlQuery.COASqlQuery<TData>() strQuery = new COASqlQuery.COASqlQuery<TData>("
 # Methods
 
 - **TestClass For Example**
-- ```csharp
+```csharp
 COASqlQuery<Ogrenci> Data = new COASqlQuery<Ogrenci>();
 Data.PrimaryKeyName = "ID";
 var ogrenci = new Ogrenci()
