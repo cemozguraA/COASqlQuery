@@ -75,3 +75,26 @@ var DeleteString = Data.GenerateDeleteQuery(a => a.BasTarihi == ogrenci.BasTarih
  var SelectString = Data.GenerateSelectQuery(a => new { a.Ad, a.SoyAd, a.Sınıf, a.BasTarihi });
  //Return : SELECT Ad,SoyAd,Sınıf,BasTarihi FROM Ogrenci
 ```
+# Extensions
+
+## SelecExtensions
+- **Where**
+ ```csharp
+var SelectString = Data.GenerateSelectQuery().Where(a=> a.BasTarihi>=ogrenci.BasTarihi || a.SoyAd==ogrenci.SoyAd);
+//Return : SELECT * FROM Ogrenci WHERE BasTarihi >= '2017-06-09 10:36:51' OR SoyAd = 'Aydın'
+```
+- **OrderBy**
+ ```csharp
+var SelectString = Data.GenerateSelectQuery().Where(a=> a.BasTarihi>=ogrenci.BasTarihi || a.SoyAd==ogrenci.SoyAd).OrderBy(a=> a.SoyAd);
+//Return : SELECT * FROM Ogrenci WHERE BasTarihi >= '2017-06-09 10:36:51' OR SoyAd = 'Aydın' ORDER BY SoyAd ASC
+```
+- **OrderByDescing**
+ ```csharp
+var SelectString = Data.GenerateSelectQuery().Where(a=> a.BasTarihi>=ogrenci.BasTarihi || a.SoyAd==ogrenci.SoyAd).OrderByDescing(a=> a. Ad);
+//Return : SELECT * FROM Ogrenci WHERE BasTarihi >= '2017-06-09 10:36:51' OR SoyAd = 'Aydın' ORDER BY Ad DESC
+```
+- **Skip**
+ ```csharp
+var SelectString = Data.GenerateSelectQuery().Where(a=> a.BasTarihi>=ogrenci.BasTarihi || a.SoyAd==ogrenci.SoyAd).OrderBy(a=> a.SoyAd).Skip(10,20);
+//Return : with dummyTable as (select ROW_NUMBER() over( ORDER BY SoyAd ASC) as RowNumber,* from Ogrenci WHERE BasTarihi >= '2017-06-09 10:39:53' OR SoyAd = 'Aydın') select top(10) ID,Ad,SoyAd,Sınıf,BasTarihi,Okul from dummyTable WHERE RowNumber > (20)
+```
