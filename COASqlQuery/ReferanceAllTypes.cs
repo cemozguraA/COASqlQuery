@@ -25,7 +25,7 @@ namespace COASqlQuery
             if (Ad.Count != Valuee.Count)
             {
                 type.Add(node.Type);
-                if (node.Type == typeof(string))
+                if (node.Type == typeof(string) || node.Type == typeof(char))
                     Valuee.Add("'" + node.Value.ToString() + "'");
                 else
                     Valuee.Add(node.Value.ToString());
@@ -73,7 +73,7 @@ namespace COASqlQuery
                 if (cleanNode.Type.Namespace == "System")
                 {
                     type.Add(cleanNode.Type);
-                    if (cleanNode.Type == typeof(string))
+                    if (cleanNode.Type == typeof(string) || cleanNode.Type == typeof(char))
                         Valuee.Add("'" + cleanNode.Value.ToString() + "'");
                     else
                         Valuee.Add(cleanNode.Value.ToString());
@@ -87,7 +87,7 @@ namespace COASqlQuery
                 {
                     type.Add(cleanNode.Type);
 
-                    if (cleanNode.Type == typeof(string))
+                    if (cleanNode.Type == typeof(string) || cleanNode.Type == typeof(char))
                         Valuee.Add("'" + cleanNode.Value.ToString() + "'");
                     else
                         Valuee.Add(cleanNode.Value.ToString());

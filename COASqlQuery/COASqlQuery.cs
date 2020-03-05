@@ -38,97 +38,15 @@ namespace COASqlQuery
 
 
 
-        public string PredicateToString(Expression<Func<T, bool>> predicate)
-        {
-
-            var ForeachSorgu = Types.GetAllTypes(predicate);
-            int i = 0;
-            string str = " WHERE";
-            foreach (var Query in ForeachSorgu.Data)
-            {
-                if (Query.Type.Type == typeof(DateTime))
-                {
-                    var date = Convert.ToDateTime(Query.Type.Value);
-                    if (Oracle)
-                    {
-                        if (date.Hour >= 1)
-                            Query.Type.Value = "TO_DATE('" + date.ToString("yyyy-MM-dd HH:mm:ss") + "', 'YYYY/MM/DD HH:MI:SS')";
-                        else
-                            Query.Type.Value += "TO_DATE('" + date.ToString("yyyy-MM-dd") + "', 'YYYY/MM/DD')";
-                    }
-                    else
-                    {
-                        if (date.Second >= 1)
-                            Query.Type.Value = "'" + date.ToString("yyyy-MM-dd HH:mm:ss") + "'";
-                        else
-                            Query.Type.Value += "'" + date.ToString("yyyy-MM-dd") + "'";
-                    }
-                }
-                switch (Query.EqualType)
-                {
-                    case "Equal":
-                        str += " " + Query.Type.Name + " = " + Query.Type.Value;
-                        break;
-                    case "NotEqual":
-                        str += " " + Query.Type.Name + " != " + Query.Type.Value;
-                        break;
-                    case "GreaterThan":
-                        str += " " + Query.Type.Name + " > " + Query.Type.Value;
-                        break;
-                    case "GreaterThanOrEqual":
-                        str += " " + Query.Type.Name + " >= " + Query.Type.Value;
-                        break;
-                    case "LessThan":
-                        str += " " + Query.Type.Name + " < " + Query.Type.Value;
-                        break;
-                    case "LessThanOrEqual":
-                        str += " " + Query.Type.Name + " <= " + Query.Type.Value;
-                        break;
-                    case "Contains":
-                        str += " " + Query.Type.Name + " LIKE %" + Query.Type.Value + "%";
-                        break;
-                    case "StartsWith":
-                        str += " " + Query.Type.Name + " LIKE " + Query.Type.Value + "%";
-                        break;
-                    case "EndsWith":
-                        str += " " + Query.Type.Name + " LIKE % " + Query.Type.Value;
-                        break;
-                }
-                if (i <= ForeachSorgu.Data.Count - 2)
-                {
-                    switch (ForeachSorgu.AndOrOr[i])
-                    {
-                        case "And":
-                            str += " AND";
-                            break;
-                        case "AndAlso":
-                            str += " AND";
-                            break;
-                        case "Or":
-                            str += " OR";
-                            break;
-                        case "OrElse":
-                            str += " OR";
-                            break;
-                    }
-                }
-
-
-                i++;
-            }
-
-            return str;
-        }
-
         public COASqlData<T> GenerateDeleteQuery(Expression<Func<T, bool>> where)
         {
-            var wherestring = PredicateToString(where);
+            var wherestring = Types.PredicateToString(where,Oracle);
 
             string str = $"DELETE FROM {TableName}{wherestring}";
             return new COASqlData<T>() { SqlQuery = str, Lenght = str.Length, TableName = TableName, Oracle = Oracle, PrimaryKeyName = PrimaryKeyName, WhereQuery = wherestring };
         }
         COAGetAllTypes Types = new COAGetAllTypes();
-        public COASqlData<T> GenerateSelectQuery(Expression<Func<T, object>> select = null)
+        public COASqlSelectData<T> GenerateSelectQuery(Expression<Func<T, object>> select = null)
         {
 
             var SelectList = new List<string>();
@@ -148,7 +66,7 @@ namespace COASqlQuery
                 selectStr = "*";
             var str = $"SELECT {selectStr} FROM {TableName}";
 
-            return new COASqlData<T>() { SqlQuery = str, Lenght = str.Length, TableName = TableName, Oracle = Oracle, PrimaryKeyName = PrimaryKeyName, SelectedColumns = SelectList };
+            return new COASqlSelectData<T>() { SqlQuery = str, Lenght = str.Length, TableName = TableName, Oracle = Oracle, PrimaryKeyName = PrimaryKeyName, SelectedColumns = SelectList };
         }
 
         public COASqlData<T> GenerateInsertQuery()
@@ -187,7 +105,7 @@ namespace COASqlQuery
             });
 
             updateQuery.Remove(updateQuery.Length - 1, 1);
-            var wherestring = PredicateToString(where);
+            var wherestring = Types.PredicateToString(where,Oracle);
             updateQuery.Append(wherestring);
             return new COASqlUpdateData<T>() { SqlQuery = updateQuery.ToString(), Lenght = updateQuery.ToString().Length, SelectedColumns=SelectedList, TableName = TableName, Oracle = Oracle, PrimaryKeyName = PrimaryKeyName, WhereQuery = wherestring };
         }
@@ -349,7 +267,7 @@ namespace COASqlQuery
     public static class Extensionn
     {
         static COAGetAllTypes Types = new COAGetAllTypes();
-        public static COASqlData<T> OrderBy<T>(this COASqlData<T> data, Expression<Func<T, object>> select)
+        public static COASqlSelectData<T> OrderBy<T>(this COASqlSelectData<T> data, Expression<Func<T, object>> select)
         {
             string selectStr = " ORDER BY ";
             var ForeachSorgu = Types.GetAllTypes(select);
@@ -360,7 +278,7 @@ namespace COASqlQuery
             data.OrderQuery = selectStr + " ASC";
             return data;
         }
-        public static COASqlData<T> OrderByDescing<T>(this COASqlData<T> data, Expression<Func<T, object>> select)
+        public static COASqlSelectData<T> OrderByDescing<T>(this COASqlSelectData<T> data, Expression<Func<T, object>> select)
         {
             string selectStr = " ORDER BY ";
             var ForeachSorgu = Types.GetAllTypes(select);
@@ -371,92 +289,15 @@ namespace COASqlQuery
             data.OrderQuery = selectStr + " DESC";
             return data;
         }
-        public static COASqlData<T> Where<T>(this COASqlData<T> data, Expression<Func<T, bool>> Where)
+        public static COASqlSelectData<T> Where<T>(this COASqlSelectData<T> data, Expression<Func<T, bool>> Where)
         {
-            var ForeachSorgu = Types.GetAllTypes(Where);
-            int i = 0;
-            string str = " WHERE";
-            foreach (var Query in ForeachSorgu.Data)
-            {
-                if (Query.Type.Type == typeof(DateTime))
-                {
-                    var date = Convert.ToDateTime(Query.Type.Value);
-                    if (data.Oracle)
-                    {
-                        if (date.Hour >= 1)
-                            Query.Type.Value = "TO_DATE('" + date.ToString("yyyy-MM-dd HH:mm:ss") + "', 'YYYY/MM/DD HH:MI:SS')";
-                        else
-                            Query.Type.Value += "TO_DATE('" + date.ToString("yyyy-MM-dd") + "', 'YYYY/MM/DD')";
-                    }
-                    else
-                    {
-                        if (date.Second >= 1)
-                            Query.Type.Value = "'" + date.ToString("yyyy-MM-dd HH:mm:ss") + "'";
-                        else
-                            Query.Type.Value += "'" + date.ToString("yyyy-MM-dd") + "'";
-                    }
-
-                }
-                switch (Query.EqualType)
-                {
-                    case "Equal":
-                        str += " " + Query.Type.Name + " = " + Query.Type.Value;
-                        break;
-                    case "NotEqual":
-                        str += " " + Query.Type.Name + " != " + Query.Type.Value;
-                        break;
-                    case "GreaterThan":
-                        str += " " + Query.Type.Name + " > " + Query.Type.Value;
-                        break;
-                    case "GreaterThanOrEqual":
-                        str += " " + Query.Type.Name + " >= " + Query.Type.Value;
-                        break;
-                    case "LessThan":
-                        str += " " + Query.Type.Name + " < " + Query.Type.Value;
-                        break;
-                    case "LessThanOrEqual":
-                        str += " " + Query.Type.Name + " <= " + Query.Type.Value;
-                        break;
-                    case "Contains":
-                        str += " " + Query.Type.Name + " LIKE %" + Query.Type.Value + "%";
-                        break;
-                    case "StartsWith":
-                        str += " " + Query.Type.Name + " LIKE " + Query.Type.Value + "%";
-                        break;
-                    case "EndsWith":
-                        str += " " + Query.Type.Name + " LIKE % " + Query.Type.Value;
-                        break;
-                }
-                if (i <= ForeachSorgu.Data.Count - 2)
-                {
-                    switch (ForeachSorgu.AndOrOr[i])
-                    {
-                        case "And":
-                            str += " AND";
-                            break;
-                        case "AndAlso":
-                            str += " AND";
-                            break;
-                        case "Or":
-                            str += " OR";
-                            break;
-                        case "OrElse":
-                            str += " OR";
-                            break;
-                    }
-                }
-
-
-                i++;
-            }
-
-
+            var str = Types.PredicateToString(Where, data.Oracle);
             data.SqlQuery += str;
             data.WhereQuery = str;
             data.Lenght = data.SqlQuery.Length;
             return data;
         }
-        public static COASqlData<T> Skip<T>(this COASqlData<T> data, int skip, int take = 0)
+        public static COASqlSelectData<T> Skip<T>(this COASqlSelectData<T> data, int skip, int take = 0)
         {
             string SelectedColumns = "";
             if (data.SelectedColumns.Count == 0 || data.SelectedColumns == null)
@@ -476,9 +317,9 @@ namespace COASqlQuery
                 Ordrquery = $"order by {data.PrimaryKeyName} asc";
             else
                 Ordrquery = data.OrderQuery;
-            var str = $"with dummyTable as (select ROW_NUMBER() over({Ordrquery}) as RowNumber,* from {data.TableName}{data.WhereQuery}) select top({skip}) {SelectedColumns} from dummyTable";
+            var str = $"with dummyTable as (select ROW_NUMBER() over({Ordrquery}) as RowNumber,* from {data.TableName}{data.WhereQuery}) select top({take}) {SelectedColumns} from dummyTable";
             if (take > 0)
-                str += $" WHERE RowNumber > ({take})";
+                str += $" WHERE RowNumber > ({skip})";
 
             data.SqlQuery = str;
             data.Lenght = data.SqlQuery.Length;
