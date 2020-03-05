@@ -80,7 +80,7 @@ var DeleteString = Data.GenerateDeleteQuery(a => a.BasTarihi == ogrenci.BasTarih
 ## SelecExtensions
 - **Where**
  ```csharp
-var SelectString = Data.GenerateSelectQuery().Where(a=> a.BasTarihi>=ogrenci.BasTarihi || a.SoyAd==ogrenci.SoyAd).OrderBy(a=> a.SoyAd);
+var SelectString = Data.GenerateSelectQuery().Where(a => a.BasTarihi >= ogrenci.BasTarihi || a.SoyAd.Contains(ogrenci.Ad) || a.SoyAd == ogrenci.SoyAd);
 //Return : SELECT * FROM Ogrenci WHERE BasTarihi >= '2017-06-09 11:47:12' OR SoyAd LIKE '%Cem%' OR SoyAd = 'Aydın'
 ```
 - **OrderBy**
