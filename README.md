@@ -29,5 +29,5 @@ COASqlQuery.COASqlQuery<TData>() strQuery = new COASqlQuery.COASqlQuery<TData>("
 | Oracle  | If your datatable is oracle set this property true|
 
 #### Methods
-- GenerateInsertQuery  
-Convert your class to insert sqlquery
+###### GenerateInsertQuery  
+- Convert your class to insert sqlquery
