@@ -40,7 +40,7 @@ namespace COASqlQuery
 
         public COASqlData<T> GenerateDeleteQuery(Expression<Func<T, bool>> where)
         {
-            var wherestring = Types.PredicateToString(where,Oracle);
+            var wherestring = Types.PredicateToString(where, Oracle);
 
             string str = $"DELETE FROM {TableName}{wherestring}";
             return new COASqlData<T>() { SqlQuery = str, Lenght = str.Length, TableName = TableName, Oracle = Oracle, PrimaryKeyName = PrimaryKeyName, WhereQuery = wherestring };
@@ -80,7 +80,17 @@ namespace COASqlQuery
                 .Remove(insertQuery.Length - 1, 1)
                 .Append(") VALUES (");
 
-            properties.ForEach(prop => { if (prop != PrimaryKeyName) insertQuery.Append($"@{prop},"); });
+            properties.ForEach(prop =>
+            {
+                if (prop != PrimaryKeyName)
+                {
+                    if (!Oracle)
+                        insertQuery.Append($"@{prop},");
+                    else
+                        insertQuery.Append($":{prop},");
+                }
+
+            });
 
             insertQuery
                 .Remove(insertQuery.Length - 1, 1)
@@ -98,16 +108,19 @@ namespace COASqlQuery
             {
                 if (!property.Equals(PrimaryKeyName))
                 {
-                    updateQuery.Append($"{property}=@{property},");
+                    if (!Oracle)
+                        updateQuery.Append($"{property}=@{property},");
+                    else
+                        updateQuery.Append($"{property}=:{property},");
                     SelectedList.Add(property);
                 }
 
             });
 
             updateQuery.Remove(updateQuery.Length - 1, 1);
-            var wherestring = Types.PredicateToString(where,Oracle);
+            var wherestring = Types.PredicateToString(where, Oracle);
             updateQuery.Append(wherestring);
-            return new COASqlUpdateData<T>() { SqlQuery = updateQuery.ToString(), Lenght = updateQuery.ToString().Length, SelectedColumns=SelectedList, TableName = TableName, Oracle = Oracle, PrimaryKeyName = PrimaryKeyName, WhereQuery = wherestring };
+            return new COASqlUpdateData<T>() { SqlQuery = updateQuery.ToString(), Lenght = updateQuery.ToString().Length, SelectedColumns = SelectedList, TableName = TableName, Oracle = Oracle, PrimaryKeyName = PrimaryKeyName, WhereQuery = wherestring };
         }
 
         //public string Update(Expression<Func<T, bool>> Where, T Value)
@@ -297,12 +310,12 @@ namespace COASqlQuery
             data.Lenght = data.SqlQuery.Length;
             return data;
         }
-        public static COASqlSelectData<T> Skip<T>(this COASqlSelectData<T> data, int skip, int take = 0)
+        public static COASqlSelectData<T> Skip<T>(this COASqlSelectData<T> data, int skip, int take)
         {
             string SelectedColumns = "";
             if (data.SelectedColumns.Count == 0 || data.SelectedColumns == null)
             {
-                
+
                 var properties = Types.GenerateListOfProperties(typeof(T).GetProperties());
                 properties.ForEach(props => { SelectedColumns += props + ","; data.SelectedColumns.Add(props); });
             }
@@ -317,9 +330,19 @@ namespace COASqlQuery
                 Ordrquery = $"order by {data.PrimaryKeyName} asc";
             else
                 Ordrquery = data.OrderQuery;
-            var str = $"with dummyTable as (select ROW_NUMBER() over({Ordrquery}) as RowNumber,* from {data.TableName}{data.WhereQuery}) select top({take}) {SelectedColumns} from dummyTable";
-            if (take > 0)
-                str += $" WHERE RowNumber > ({skip})";
+            var str = "";
+
+            if (!data.Oracle)
+            {
+                str = $"with dummyTable as (select ROW_NUMBER() over({Ordrquery}) as RowNumber,* from {data.TableName}{data.WhereQuery}) select top({take}) {SelectedColumns} from dummyTable";
+                if (take > 0)
+                    str += $" WHERE RowNumber > ({skip})";
+            }
+            else
+            {
+                str = $"select {SelectedColumns} from(select a.*, rownum rnum from(select * from {data.TableName}{data.WhereQuery} {Ordrquery}) a where rownum <= {take+skip})where rnum > {skip}";
+            }
+           
 
             data.SqlQuery = str;
             data.Lenght = data.SqlQuery.Length;
@@ -338,7 +361,10 @@ namespace COASqlQuery
 
                  if (!colums.Equals(data.PrimaryKeyName))
                  {
-                     updateQuery.Append($"{colums}=@{colums},");
+                     if (!data.Oracle)
+                         updateQuery.Append($"{colums}=@{colums},");
+                     else
+                         updateQuery.Append($"{colums}=:{colums},");
                      data.SelectedColumns.Add(colums);
                  }
 
@@ -356,7 +382,7 @@ namespace COASqlQuery
             if (data.SelectedColumns == null || data.SelectedColumns.Count == 0)
                 Columns = Types.GenerateListOfProperties(typeof(T).GetProperties());
             else
-                Columns =new List<string>(data.SelectedColumns);
+                Columns = new List<string>(data.SelectedColumns);
             var updateQuery = new StringBuilder($"UPDATE {data.TableName} SET ");
             data.SelectedColumns.Clear();
             Columns.ForEach(colums =>
@@ -368,7 +394,10 @@ namespace COASqlQuery
                     {
                         if (!colums.Equals(selcomuns))
                         {
-                            updateQuery.Append($"{colums}=@{colums},");
+                            if (!data.Oracle)
+                                updateQuery.Append($"{colums}=@{colums},");
+                            else
+                                updateQuery.Append($"{colums}=:{colums},");
                             data.SelectedColumns.Add(colums);
                         }
 
