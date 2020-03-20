@@ -5,8 +5,7 @@
 - Convert your class and predicate into SqlQuery. Work with dapper.
 
 ### NugetPackage
-[https://www.nuget.org/packages/COASqlQuery]
-(https://www.nuget.org/packages/COASqlQuery)
+[https://www.nuget.org/packages/COASqlQuery](https://www.nuget.org/packages/COASqlQuery)
 
 #### Usage
 
