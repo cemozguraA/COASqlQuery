@@ -70,10 +70,31 @@ var DeleteString = Data.GenerateDeleteQuery(a => a.BasTarihi == ogrenci.BasTarih
  var SelectString = Data.GenerateSelectQuery();
 //Return : SELECT * FROM Ogrenci
 
-
  var SelectString = Data.GenerateSelectQuery(a => new { a.Ad, a.SoyAd, a.Sınıf, a.BasTarihi });
  //Return : SELECT Ad,SoyAd,Sınıf,BasTarihi FROM Ogrenci
 ```
+
+## GenerateJoinQuery 
+- Convert your class to Join sqlquery 
+ ```csharp
+var JoinQuery = Data.GenerateJoinQuery<Ogretmen, Ders, Notlar>().Equal((a, b, c) => b.ID == a.ID && c.ID == a.ID);
+//Return : SELECT Ogretmen.ID,Ogretmen.Ad,Ogretmen.Soyad,Ogretmen.Telefon,Ogretmen.Photo,Ogretmen.Kalem,Ders.ID,Ders.Kimya,Ders.Geometri,Ders.Matematik,Ders.Felsefe,Notlar.ID,Notlar.Final,Notlar.Vize,Notlar.BUT FROM Ogretmen INNER JOIN Ders ON Ders.ID = Ogretmen.ID INNER JOIN Notlar ON Notlar.ID = Ogretmen.ID
+```
+
+## GenerateLeftJoinQuery 
+- Convert your class to Left Join sqlquery 
+ ```csharp
+var JoinQuery = Data.GenerateLeftJoinQuery<Ogretmen, Ders, Notlar>().Equal((a, b, c) => b.ID == a.ID && c.ID == a.ID);
+//Return : SELECT Ogretmen.ID,Ogretmen.Ad,Ogretmen.Soyad,Ogretmen.Telefon,Ogretmen.Photo,Ogretmen.Kalem,Ders.ID,Ders.Kimya,Ders.Geometri,Ders.Matematik,Ders.Felsefe,Notlar.ID,Notlar.Final,Notlar.Vize,Notlar.BUT FROM Ogretmen LEFT JOIN Ders ON Ders.ID = Ogretmen.ID LEFT JOIN Notlar ON Notlar.ID = Ogretmen.ID
+```
+
+## GenerateRightJoinQuery 
+- Convert your class to Right Join sqlquery 
+ ```csharp
+var JoinQuery = Data.GenerateRightJoinQuery<Ogretmen, Ders, Notlar>().Equal((a, b, c) => b.ID == a.ID && c.ID == a.ID);
+//Return : SELECT Ogretmen.ID,Ogretmen.Ad,Ogretmen.Soyad,Ogretmen.Telefon,Ogretmen.Photo,Ogretmen.Kalem,Ders.ID,Ders.Kimya,Ders.Geometri,Ders.Matematik,Ders.Felsefe,Notlar.ID,Notlar.Final,Notlar.Vize,Notlar.BUT FROM Ogretmen RIGHT JOIN Ders ON Ders.ID = Ogretmen.ID RIGHT JOIN Notlar ON Notlar.ID = Ogretmen.ID
+```
+
 # Extensions
 
 ## SelecExtensions
@@ -109,4 +130,24 @@ var SelectString = Data.GenerateSelectQuery().Where(a=> a.BasTarihi>=ogrenci.Bas
  ```csharp
  var updateString =  Data.GenerateUpdateQuery(a => a.BasTarihi == ogrenci.BasTarihi).RemoveColums(a => a.SoyAd);
 //Return : UPDATE Ogrenci SET Ad=@Ad,Sınıf=@Sınıf,BasTarihi=@BasTarihi,Okul=@Okul WHERE BasTarihi = '2017-06-09 10:39:53'
+```
+
+## JoinExtensions
+
+- **RemoveColums**
+ ```csharp
+ var Joinstring =  Data.GenerateJoinQuery<Ogretmen, Ders, Notlar>().RemoveColums((a, b, c) => new object[] { b.ID, c.ID }).Equal((a, b, c) => b.ID == a.ID && c.ID == a.ID)
+//Return : SELECT Ogretmen.ID,Ogretmen.Ad,Ogretmen.Soyad,Ogretmen.Telefon,Ogretmen.Photo,Ogretmen.Kalem,Ders.Kimya,Ders.Geometri,Ders.Matematik,Ders.Felsefe,Notlar.Final,Notlar.Vize,Notlar.BUT FROM Ogretmen INNER JOIN Ders ON Ders.ID = Ogretmen.ID INNER JOIN Notlar ON Notlar.ID = Ogretmen.ID
+```
+
+- **Where**
+ ```csharp
+ var Joinstring =  Data.GenerateJoinQuery<Ogretmen, Ders, Notlar>().RemoveColums((a, b, c) => new object[] { b.ID, c.ID }).Equal((a, b, c) => b.ID == a.ID && c.ID == a.ID).Where((a, b, c) => a.Ad.Contains("C"))
+//Return : SELECT Ogretmen.ID,Ogretmen.Ad,Ogretmen.Soyad,Ogretmen.Telefon,Ogretmen.Photo,Ogretmen.Kalem,Ders.Kimya,Ders.Geometri,Ders.Matematik,Ders.Felsefe,Notlar.Final,Notlar.Vize,Notlar.BUT FROM Ogretmen INNER JOIN Ders ON Ders.ID = Ogretmen.ID INNER JOIN Notlar ON Notlar.ID = Ogretmen.ID WHERE Ogretmen.Ad LIKE '%C%'
+```
+
+- **OrderBy**
+ ```csharp
+ var Joinstring =  Data.GenerateJoinQuery<Ogretmen, Ders, Notlar>().RemoveColums((a, b, c) => new object[] { b.ID, c.ID }).Equal((a, b, c) => b.ID == a.ID && c.ID == a.ID).Where((a, b, c) => a.Ad.Contains("C")).OrderBy((a, b, c) => a.Ad);
+//Return : SELECT Ogretmen.ID,Ogretmen.Ad,Ogretmen.Soyad,Ogretmen.Telefon,Ogretmen.Photo,Ogretmen.Kalem,Ders.Kimya,Ders.Geometri,Ders.Matematik,Ders.Felsefe,Notlar.Final,Notlar.Vize,Notlar.BUT FROM Ogretmen INNER JOIN Ders ON Ders.ID = Ogretmen.ID INNER JOIN Notlar ON Notlar.ID = Ogretmen.ID WHERE Ogretmen.Ad LIKE '%C%' ORDER BY Ogretmen.Ad ASC
 ```
