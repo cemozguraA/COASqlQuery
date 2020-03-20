@@ -75,21 +75,21 @@ var DeleteString = Data.GenerateDeleteQuery(a => a.BasTarihi == ogrenci.BasTarih
 ```
 
 ## GenerateJoinQuery 
-- Convert your class to Join sqlquery 
+- Convert your class to Join sqlquery. You must call equal extension after call this method.  
  ```csharp
 var JoinQuery = Data.GenerateJoinQuery<Ogretmen, Ders, Notlar>().Equal((a, b, c) => b.ID == a.ID && c.ID == a.ID);
 //Return : SELECT Ogretmen.ID,Ogretmen.Ad,Ogretmen.Soyad,Ogretmen.Telefon,Ogretmen.Photo,Ogretmen.Kalem,Ders.ID,Ders.Kimya,Ders.Geometri,Ders.Matematik,Ders.Felsefe,Notlar.ID,Notlar.Final,Notlar.Vize,Notlar.BUT FROM Ogretmen INNER JOIN Ders ON Ders.ID = Ogretmen.ID INNER JOIN Notlar ON Notlar.ID = Ogretmen.ID
 ```
 
 ## GenerateLeftJoinQuery 
-- Convert your class to Left Join sqlquery 
+- Convert your class to Left Join sqlquery. You must call equal extension after call this method.  
  ```csharp
 var JoinQuery = Data.GenerateLeftJoinQuery<Ogretmen, Ders, Notlar>().Equal((a, b, c) => b.ID == a.ID && c.ID == a.ID);
 //Return : SELECT Ogretmen.ID,Ogretmen.Ad,Ogretmen.Soyad,Ogretmen.Telefon,Ogretmen.Photo,Ogretmen.Kalem,Ders.ID,Ders.Kimya,Ders.Geometri,Ders.Matematik,Ders.Felsefe,Notlar.ID,Notlar.Final,Notlar.Vize,Notlar.BUT FROM Ogretmen LEFT JOIN Ders ON Ders.ID = Ogretmen.ID LEFT JOIN Notlar ON Notlar.ID = Ogretmen.ID
 ```
 
 ## GenerateRightJoinQuery 
-- Convert your class to Right Join sqlquery 
+- Convert your class to Right Join sqlquery. You must call equal extension after call this method. 
  ```csharp
 var JoinQuery = Data.GenerateRightJoinQuery<Ogretmen, Ders, Notlar>().Equal((a, b, c) => b.ID == a.ID && c.ID == a.ID);
 //Return : SELECT Ogretmen.ID,Ogretmen.Ad,Ogretmen.Soyad,Ogretmen.Telefon,Ogretmen.Photo,Ogretmen.Kalem,Ders.ID,Ders.Kimya,Ders.Geometri,Ders.Matematik,Ders.Felsefe,Notlar.ID,Notlar.Final,Notlar.Vize,Notlar.BUT FROM Ogretmen RIGHT JOIN Ders ON Ders.ID = Ogretmen.ID RIGHT JOIN Notlar ON Notlar.ID = Ogretmen.ID
