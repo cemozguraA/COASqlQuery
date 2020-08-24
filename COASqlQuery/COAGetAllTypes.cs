@@ -10,39 +10,13 @@ namespace COASqlQuery
 {
     public partial class COAGetAllTypes
     {
-        public QueryEntityList GetAllTypes<T, U>(Expression<Func<T, U>> expression)
+        public COAReferanceDataType GetAllTypes(Expression expression)
         {
-
-            var v = new ReferanceAllTypes(typeof(T));
+            var v = new ReferanceAllTypes();
             v.Visit(expression);
-            QueryEntitiy QueryItem = null;
-            var listt = new QueryEntityList();
-            for (int i = 0; i < v.Ad.Count; i++)
-            {
-                try
-                {
-                    QueryItem = new QueryEntitiy()
-                    {
-                        EqualType = v.EqualType[i],
-                        Type = new TypeAndValue()
-                        {
-                            Name = v.Ad[i],
-                            Value = v.Valuee[i].ToString(),
-                            Type = v.type[i]
-                        }
-                    };
-                }
-                catch (Exception)
-                {
-                }
-
-                listt.Data.Add(QueryItem);
-            }
-            listt.Ad = v.Ad;
-            listt.AndOrOr = v.AndAlsoOrOr;
-            return listt;
+            return v.Datas;
         }
-
+      
         public List<string> GenerateListOfProperties(IEnumerable<PropertyInfo> listOfProperties)
         {
             return (from prop in listOfProperties
@@ -52,65 +26,65 @@ namespace COASqlQuery
         }
 
 
-        public string PredicateToString<T>(Expression<Func<T, bool>> predicate,bool Oracle)
+        public string PredicateToString(Expression predicate, bool Oracle,bool join = false)
         {
 
-            var ForeachSorgu = GetAllTypes(predicate);
-            int i = 0;
+            var Query = GetAllTypes(predicate);
             string str = " WHERE";
-            foreach (var Query in ForeachSorgu.Data)
+            for (int i = 0; i < Query.Name.Count; i++)
             {
-                if (Query.Type.Type == typeof(DateTime))
+
+                if (Query.Type[i] == typeof(DateTime))
                 {
-                    var date = Convert.ToDateTime(Query.Type.Value);
+                    var date = Convert.ToDateTime(Query.Value[i]);
                     if (Oracle)
                     {
                         if (date.Hour >= 1)
-                            Query.Type.Value = "TO_DATE('" + date.ToString("yyyy-MM-dd HH:mm:ss") + "', 'YYYY/MM/DD HH:MI:SS')";
+                            Query.Value[i] = "TO_DATE('" + date.ToString("yyyy-MM-dd HH:mm:ss") + "', 'YYYY/MM/DD HH:MI:SS')";
                         else
-                            Query.Type.Value += "TO_DATE('" + date.ToString("yyyy-MM-dd") + "', 'YYYY/MM/DD')";
+                            Query.Value[i] += "TO_DATE('" + date.ToString("yyyy-MM-dd") + "', 'YYYY/MM/DD')";
                     }
                     else
                     {
                         if (date.Second >= 1)
-                            Query.Type.Value = "'" + date.ToString("yyyy-MM-dd HH:mm:ss") + "'";
+                            Query.Value[i] = "'" + date.ToString("yyyy-MM-dd HH:mm:ss") + "'";
                         else
-                            Query.Type.Value += "'" + date.ToString("yyyy-MM-dd") + "'";
+                            Query.Value[i] += "'" + date.ToString("yyyy-MM-dd") + "'";
                     }
                 }
-                switch (Query.EqualType)
+                switch (Query.EqualType[i])
                 {
                     case "Equal":
-                        str += " " + Query.Type.Name + " = " + Query.Type.Value;
+                        str += " " + Query.Name[i] + " = " + Query.Value[i];
                         break;
                     case "NotEqual":
-                        str += " " + Query.Type.Name + " != " + Query.Type.Value;
+                        str += " " + Query.Name[i] + " != " + Query.Value[i];
                         break;
                     case "GreaterThan":
-                        str += " " + Query.Type.Name + " > " + Query.Type.Value;
+                        str += " " + Query.Name[i] + " > " + Query.Value[i];
                         break;
                     case "GreaterThanOrEqual":
-                        str += " " + Query.Type.Name + " >= " + Query.Type.Value;
+                        str += " " + Query.Name[i] + " >= " + Query.Value[i];
                         break;
                     case "LessThan":
-                        str += " " + Query.Type.Name + " < " + Query.Type.Value;
+                        str += " " + Query.Name[i] + " < " + Query.Value[i];
                         break;
                     case "LessThanOrEqual":
-                        str += " " + Query.Type.Name + " <= " + Query.Type.Value;
+                        str += " " + Query.Name[i] + " <= " + Query.Value[i];
                         break;
                     case "Contains":
-                        str += " " + Query.Type.Name + " LIKE '%" + TurnChar(Query.Type.Value) + "%'";
+                        str += " " + Query.Name[i] + " LIKE '%" + TurnChar(Query.Value[i]) + "%'";
                         break;
                     case "StartsWith":
-                        str += " " + Query.Type.Name + " LIKE '" + TurnChar(Query.Type.Value) + "%'";
+                        str += " " + Query.Name[i] + " LIKE '" + TurnChar(Query.Value[i]) + "%'";
                         break;
                     case "EndsWith":
-                        str += " " + Query.Type.Name + " LIKE '% " + TurnChar(Query.Type.Value) + "'";
+                        str += " " + Query.Name[i] + " LIKE '% " + TurnChar(Query.Value[i]) + "'";
                         break;
                 }
-                if (i <= ForeachSorgu.Data.Count - 2)
+                if (i <= Query.Name.Count - 2)
                 {
-                    switch (ForeachSorgu.AndOrOr[i])
+                    switch (Query.AndOr[i])
                     {
                         case "And":
                             str += " AND";
@@ -126,9 +100,6 @@ namespace COASqlQuery
                             break;
                     }
                 }
-
-
-                i++;
             }
 
             return str;
@@ -142,5 +113,25 @@ namespace COASqlQuery
             }
             return str;
         }
+        public string JoinSqlGenerator<T1>(List<string> SelectColums)
+        {
+            var str = new StringBuilder("SELECT ");
+            SelectColums.ForEach((x) => { str.Append($"{x},"); });
+            str.Remove(str.Length - 1, 1);
+            str.Append(" FROM " + typeof(T1).Name);
+            return str.ToString();
+        }
+        public List<string> JoinBaseGenerator(COAReferanceDataType Column1Selected)
+        {
+            var list = new List<string>();
+
+            for (int i = 0; i < Column1Selected.Name.Count; i++)
+            {
+                list.Add($"{Column1Selected.Class[i]}.{Column1Selected.Name[i]}");
+            }
+
+            return list;
+        }
+
     }
 }

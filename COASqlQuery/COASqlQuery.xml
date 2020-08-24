@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>COASqlQuery</name>
+    </assembly>
+    <members>
+        <member name="M:COASqlQuery.Extensionn.OrderBy``1(COASqlQuery.COASqlSelectData{``0},System.Linq.Expressions.Expression{System.Func{``0,System.Object}})">
+            <summary>
+            Set OrderBy option
+            </summary>
+        </member>
+        <member name="M:COASqlQuery.Extensionn.OrderByDescing``1(COASqlQuery.COASqlSelectData{``0},System.Linq.Expressions.Expression{System.Func{``0,System.Object}})">
+            <summary>
+            Set OrderByDescing option
+            </summary>
+        </member>
+        <member name="M:COASqlQuery.Extensionn.Where``1(COASqlQuery.COASqlSelectData{``0},System.Linq.Expressions.Expression{System.Func{``0,System.Boolean}})">
+            <summary>
+            This is search property for your datas
+            </summary>
+        </member>
+        <member name="M:COASqlQuery.Extensionn.Skip``1(COASqlQuery.COASqlSelectData{``0},System.Int32,System.Int32)">
+            <summary>
+            Skip - Take your list in database
+            </summary>
+        </member>
+        <member name="M:COASqlQuery.Extensionn.SelectColums``1(COASqlQuery.COASqlUpdateData{``0},System.Linq.Expressions.Expression{System.Func{``0,System.Object}})">
+            <summary>
+            Select what you want columns
+            </summary>
+        </member>
+        <member name="M:COASqlQuery.Extensionn.RemoveColums``1(COASqlQuery.COASqlUpdateData{``0},System.Linq.Expressions.Expression{System.Func{``0,System.Object}})">
+            <summary>
+            Remove what you want columns
+            </summary>
+        </member>
+    </members>
+</doc>

@@ -8,27 +8,19 @@ namespace COASqlQuery
 {
     public class ReferanceAllTypes : ExpressionVisitor
     {
-        private readonly Type _ownerType;
-        public List<string> Ad = new List<string>();
-        public List<string> Valuee = new List<string>();
-        public List<string> EqualType = new List<string>();
-        public List<string> AndAlsoOrOr = new List<string>();
-        public List<Type> type = new List<Type>();
 
-        public ReferanceAllTypes(Type ownerType)
-        {
-            _ownerType = ownerType;
-        }
+     
+        public COAReferanceDataType Datas = new COAReferanceDataType();
 
         protected override Expression VisitConstant(ConstantExpression node)
         {
-            if (Ad.Count != Valuee.Count)
+            if (Datas.Name.Count != Datas.Value.Count)
             {
-                type.Add(node.Type);
-                if (node.Type == typeof(string) || node.Type == typeof(char))
-                    Valuee.Add("'" + node.Value.ToString() + "'");
+                Datas.Type.Add(node.Type);
+                if (node.Type == typeof(string) || node.Type == typeof(char) || node.Type == typeof(Guid))
+                    Datas.Value.Add("'" + node.Value.ToString() + "'");
                 else
-                    Valuee.Add(node.Value.ToString());
+                    Datas.Value.Add(node.Value.ToString());
 
 
             }
@@ -39,7 +31,7 @@ namespace COASqlQuery
         protected override Expression VisitMethodCall(MethodCallExpression node)
         {
             var iteme = node.Method.Name;
-            EqualType.Add(iteme);
+            Datas.EqualType.Add(iteme);
             return base.VisitMethodCall(node);
         }
         protected override Expression VisitBinary(BinaryExpression node)
@@ -52,12 +44,12 @@ namespace COASqlQuery
                    | node.NodeType == ExpressionType.LessThanOrEqual
                    )
             {
-                EqualType.Add(node.NodeType.ToString());
+                Datas.EqualType.Add(node.NodeType.ToString());
 
             }
             else if (node.NodeType == ExpressionType.And || node.NodeType == ExpressionType.AndAlso || node.NodeType == ExpressionType.Or || node.NodeType == ExpressionType.OrElse)
             {
-                AndAlsoOrOr.Add(node.NodeType.ToString());
+                Datas.AndOr.Add(node.NodeType.ToString());
             }
 
             return base.VisitBinary(node);
@@ -72,11 +64,11 @@ namespace COASqlQuery
                 var cleanNode = GetMemberConstant(node);
                 if (cleanNode.Type.Namespace == "System")
                 {
-                    type.Add(cleanNode.Type);
-                    if (cleanNode.Type == typeof(string) || cleanNode.Type == typeof(char))
-                        Valuee.Add("'" + cleanNode.Value.ToString() + "'");
+                    Datas.Type.Add(cleanNode.Type);
+                    if (cleanNode.Type == typeof(string) || cleanNode.Type == typeof(char) || cleanNode.Type == typeof(Guid))
+                        Datas.Value.Add("'" + cleanNode.Value.ToString() + "'");
                     else
-                        Valuee.Add(cleanNode.Value.ToString());
+                        Datas.Value.Add(cleanNode.Value.ToString());
                 }
 
             }
@@ -85,12 +77,12 @@ namespace COASqlQuery
                 var cleanNode = GetMemberConstant(node);
                 if (cleanNode.Type.Namespace == "System")
                 {
-                    type.Add(cleanNode.Type);
+                    Datas.Type.Add(cleanNode.Type);
 
-                    if (cleanNode.Type == typeof(string) || cleanNode.Type == typeof(char))
-                        Valuee.Add("'" + cleanNode.Value.ToString() + "'");
+                    if (cleanNode.Type == typeof(string) || cleanNode.Type == typeof(char) || cleanNode.Type == typeof(Guid))
+                        Datas.Value.Add("'" + cleanNode.Value.ToString() + "'");
                     else
-                        Valuee.Add(cleanNode.Value.ToString());
+                        Datas.Value.Add(cleanNode.Value.ToString());
                 }
 
 
@@ -98,11 +90,11 @@ namespace COASqlQuery
 
             var propertyInfo = node.Member as PropertyInfo;
 
-            if (propertyInfo != null && _ownerType.IsAssignableFrom(propertyInfo.DeclaringType) && node.Expression.NodeType == ExpressionType.Parameter)
+            if (propertyInfo != null && node.Expression.NodeType == ExpressionType.Parameter)
             {
-                Ad.Add(propertyInfo.Name);
+                Datas.Name.Add(propertyInfo.Name);
+                Datas.Class.Add(node.Expression.Type.Name);
             }
-
 
             if (node.Member.DeclaringType.IsDefined(typeof(CompilerGeneratedAttribute), true))
             {
