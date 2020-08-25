@@ -10,7 +10,7 @@ namespace COASqlQuery
 {
     public partial class COASqlQuery<T>
     {
-        public bool Oracle { get; set; } = false;
+        public COADataBaseTypes DataBaseType { get; set; } = COADataBaseTypes.Sql;
 
         public string TableName { get { return tableName; } }
 
@@ -42,10 +42,10 @@ namespace COASqlQuery
 
         public COASqlData<T> GenerateDeleteQuery(Expression<Func<T, bool>> where)
         {
-            var wherestring = Types.PredicateToString(where, Oracle);
+            var wherestring = Types.PredicateToString(where, DataBaseType);
 
             string str = $"DELETE FROM {tableName}{wherestring}";
-            return new COASqlData<T>() { SqlQuery = str, Lenght = str.Length, TableName = tableName, Oracle = Oracle, PrimaryKeyName = PrimaryKeyName, WhereQuery = wherestring };
+            return new COASqlData<T>() { SqlQuery = str, Lenght = str.Length, TableName = tableName, DataBaseType = DataBaseType, PrimaryKeyName = PrimaryKeyName, WhereQuery = wherestring };
         }
         COAGetAllTypes Types = new COAGetAllTypes();
         public COASqlSelectData<T> GenerateSelectQuery(Expression<Func<T, object>> select = null)
@@ -68,7 +68,7 @@ namespace COASqlQuery
                 selectStr = "*";
             var str = $"SELECT {selectStr} FROM {tableName}";
 
-            return new COASqlSelectData<T>() { SqlQuery = str, Lenght = str.Length, TableName = tableName, Oracle = Oracle, PrimaryKeyName = PrimaryKeyName, SelectedColumns = SelectList };
+            return new COASqlSelectData<T>() { SqlQuery = str, Lenght = str.Length, TableName = tableName, DataBaseType = DataBaseType, PrimaryKeyName = PrimaryKeyName, SelectedColumns = SelectList };
         }
 
         public COASqlData<T> GenerateInsertQuery()
@@ -86,7 +86,7 @@ namespace COASqlQuery
             {
                 if (prop != PrimaryKeyName)
                 {
-                    if (!Oracle)
+                    if (DataBaseType == COADataBaseTypes.Sql)
                         insertQuery.Append($"@{prop},");
                     else
                         insertQuery.Append($":{prop},");
@@ -98,7 +98,7 @@ namespace COASqlQuery
                 .Remove(insertQuery.Length - 1, 1)
                 .Append(")");
 
-            return new COASqlData<T>() { SqlQuery = insertQuery.ToString(), Lenght = insertQuery.ToString().Length, TableName = tableName, Oracle = Oracle, PrimaryKeyName = PrimaryKeyName };
+            return new COASqlData<T>() { SqlQuery = insertQuery.ToString(), Lenght = insertQuery.ToString().Length, TableName = tableName, DataBaseType = DataBaseType, PrimaryKeyName = PrimaryKeyName };
         }
         public COASqlUpdateData<T> GenerateUpdateQuery(Expression<Func<T, bool>> where)
         {
@@ -110,7 +110,7 @@ namespace COASqlQuery
             {
                 if (!property.Equals(PrimaryKeyName))
                 {
-                    if (!Oracle)
+                    if (DataBaseType == COADataBaseTypes.Sql)
                         updateQuery.Append($"{property}=@{property},");
                     else
                         updateQuery.Append($"{property}=:{property},");
@@ -120,94 +120,94 @@ namespace COASqlQuery
             });
 
             updateQuery.Remove(updateQuery.Length - 1, 1);
-            var wherestring = Types.PredicateToString(where, Oracle);
+            var wherestring = Types.PredicateToString(where, DataBaseType);
             updateQuery.Append(wherestring);
-            return new COASqlUpdateData<T>() { SqlQuery = updateQuery.ToString(), Lenght = updateQuery.ToString().Length, SelectedColumns = SelectedList, TableName = tableName, Oracle = Oracle, PrimaryKeyName = PrimaryKeyName, WhereQuery = wherestring };
+            return new COASqlUpdateData<T>() { SqlQuery = updateQuery.ToString(), Lenght = updateQuery.ToString().Length, SelectedColumns = SelectedList, TableName = tableName, DataBaseType = DataBaseType, PrimaryKeyName = PrimaryKeyName, WhereQuery = wherestring };
         }
 
         public COASqlJoinData<T, T1, T2> GenerateJoinQuery<T1, T2>(Expression<Func<T1, T2, object>> SetTables = null)
         {
             var RData = new COASqlJoinData<T, T1, T2>();
-            RData.Add(MainJoinGeneator<T1>(SetTables, RData,oracle:Oracle));
+            RData.Add(MainJoinGeneator<T1>(SetTables, RData,databasetype:DataBaseType));
             return RData;
         }
         public COASqlJoinData<T, T1, T2, T3> GenerateJoinQuery<T1, T2, T3>(Expression<Func<T1, T2, T3, object>> SetTables = null)
         {
             var RData = new COASqlJoinData<T, T1, T2, T3>();
-            RData.Add(MainJoinGeneator<T1>(SetTables, RData, oracle: Oracle));
+            RData.Add(MainJoinGeneator<T1>(SetTables, RData, databasetype: DataBaseType));
             return RData;
         }
         public COASqlJoinData<T, T1, T2, T3, T4> GenerateJoinQuery<T1, T2, T3, T4>(Expression<Func<T1, T2, T3, T4, object>> SetTables = null)
         {
             var RData = new COASqlJoinData<T, T1, T2, T3, T4>();
-            RData.Add(MainJoinGeneator<T1>(SetTables, RData, oracle: Oracle));
+            RData.Add(MainJoinGeneator<T1>(SetTables, RData, databasetype: DataBaseType));
             return RData;
         }
         public COASqlJoinData<T, T1, T2, T3, T4, T5> GenerateJoinQuery<T1, T2, T3, T4, T5>(Expression<Func<T1, T2, T3, T4, T5, object>> SetTables = null)
         {
             var RData = new COASqlJoinData<T, T1, T2, T3, T4, T5>();
-            RData.Add(MainJoinGeneator<T1>(SetTables, RData, oracle: Oracle));
+            RData.Add(MainJoinGeneator<T1>(SetTables, RData, databasetype: DataBaseType));
             return RData;
         }
         public COASqlJoinData<T, T1, T2, T3, T4, T5, T6> GenerateJoinQuery<T1, T2, T3, T4, T5, T6>(Expression<Func<T1, T2, T3, T4, T5, T6, object>> SetTables = null)
         {
             var RData = new COASqlJoinData<T, T1, T2, T3, T4, T5, T6>();
-            RData.Add(MainJoinGeneator<T1>(SetTables, RData, oracle: Oracle));
+            RData.Add(MainJoinGeneator<T1>(SetTables, RData, databasetype: DataBaseType));
             return RData;
         }
         public COASqlJoinData<T, T1, T2, T3, T4, T5, T6, T7> GenerateJoinQuery<T1, T2, T3, T4, T5, T6, T7>(Expression<Func<T1, T2, T3, T4, T5, T6, T7, object>> SetTables = null)
         {
             var RData = new COASqlJoinData<T, T1, T2, T3, T4, T5, T6, T7>();
-            RData.Add(MainJoinGeneator<T1>(SetTables, RData, oracle: Oracle));
+            RData.Add(MainJoinGeneator<T1>(SetTables, RData, databasetype: DataBaseType));
             return RData;
         }
         public COASqlJoinData<T, T1, T2, T3, T4, T5, T6, T7, T8> GenerateJoinQuery<T1, T2, T3, T4, T5, T6, T7, T8>(Expression<Func<T1, T2, T3, T4, T5, T6, T7, T8, object>> SetTables)
         {
             var RData = new COASqlJoinData<T, T1, T2, T3, T4, T5, T6, T7, T8>();
-            RData.Add(MainJoinGeneator<T1>(SetTables, RData, oracle: Oracle));
+            RData.Add(MainJoinGeneator<T1>(SetTables, RData, databasetype: DataBaseType));
             return RData;
         }
 
         public COASqlJoinData<T, T1, T2> GenerateLeftJoinQuery<T1, T2>(Expression<Func<T1, T2, object>> SetTables = null)
         {
             var RData = new COASqlJoinData<T, T1, T2>();
-            RData.Add(MainJoinGeneator<T1>(SetTables, RData, COASqlJoinTypes.LEFT, Oracle));
+            RData.Add(MainJoinGeneator<T1>(SetTables, RData, COASqlJoinTypes.LEFT, DataBaseType));
             return RData;
         }
         public COASqlJoinData<T, T1, T2, T3> GenerateLeftJoinQuery<T1, T2, T3>(Expression<Func<T1, T2, T3, object>> SetTables = null)
         {
             var RData = new COASqlJoinData<T, T1, T2, T3>();
-            RData.Add(MainJoinGeneator<T1>(SetTables, RData, COASqlJoinTypes.LEFT,Oracle));
+            RData.Add(MainJoinGeneator<T1>(SetTables, RData, COASqlJoinTypes.LEFT,DataBaseType));
             return RData;
         }
         public COASqlJoinData<T, T1, T2, T3, T4> GenerateLeftJoinQuery<T1, T2, T3, T4>(Expression<Func<T1, T2, T3, T4, object>> SetTables = null)
         {
             var RData = new COASqlJoinData<T, T1, T2, T3, T4>();
-            RData.Add(MainJoinGeneator<T1>(SetTables, RData, COASqlJoinTypes.LEFT, Oracle));
+            RData.Add(MainJoinGeneator<T1>(SetTables, RData, COASqlJoinTypes.LEFT, DataBaseType));
             return RData;
         }
         public COASqlJoinData<T, T1, T2, T3, T4, T5> GenerateLeftJoinQuery<T1, T2, T3, T4, T5>(Expression<Func<T1, T2, T3, T4, T5, object>> SetTables = null)
         {
             var RData = new COASqlJoinData<T, T1, T2, T3, T4, T5>();
-            RData.Add(MainJoinGeneator<T1>(SetTables, RData, COASqlJoinTypes.LEFT, Oracle));
+            RData.Add(MainJoinGeneator<T1>(SetTables, RData, COASqlJoinTypes.LEFT, DataBaseType));
             return RData;
         }
         public COASqlJoinData<T, T1, T2, T3, T4, T5, T6> GenerateLeftJoinQuery<T1, T2, T3, T4, T5, T6>(Expression<Func<T1, T2, T3, T4, T5, T6, object>> SetTables = null)
         {
             var RData = new COASqlJoinData<T, T1, T2, T3, T4, T5, T6>();
-            RData.Add(MainJoinGeneator<T1>(SetTables, RData, COASqlJoinTypes.LEFT, Oracle));
+            RData.Add(MainJoinGeneator<T1>(SetTables, RData, COASqlJoinTypes.LEFT, DataBaseType));
             return RData;
         }
         public COASqlJoinData<T, T1, T2, T3, T4, T5, T6, T7> GenerateLeftJoinQuery<T1, T2, T3, T4, T5, T6, T7>(Expression<Func<T1, T2, T3, T4, T5, T6, T7, object>> SetTables = null)
         {
             var RData = new COASqlJoinData<T, T1, T2, T3, T4, T5, T6, T7>();
-            RData.Add(MainJoinGeneator<T1>(SetTables, RData, COASqlJoinTypes.LEFT, Oracle));
+            RData.Add(MainJoinGeneator<T1>(SetTables, RData, COASqlJoinTypes.LEFT, DataBaseType));
             return RData;
         }
         public COASqlJoinData<T, T1, T2, T3, T4, T5, T6, T7, T8> GenerateLeftJoinQuery<T1, T2, T3, T4, T5, T6, T7, T8>(Expression<Func<T1, T2, T3, T4, T5, T6, T7, T8, object>> SetTables)
         {
             var RData = new COASqlJoinData<T, T1, T2, T3, T4, T5, T6, T7, T8>();
-            RData.Add(MainJoinGeneator<T1>(SetTables, RData, COASqlJoinTypes.LEFT, Oracle));
+            RData.Add(MainJoinGeneator<T1>(SetTables, RData, COASqlJoinTypes.LEFT, DataBaseType));
             return RData;
         }
 
@@ -216,50 +216,50 @@ namespace COASqlQuery
         public COASqlJoinData<T, T1, T2> GenerateRightJoinQuery<T1, T2>(Expression<Func<T1, T2, object>> SetTables = null)
         {
             var RData = new COASqlJoinData<T, T1, T2>();
-            RData.Add(MainJoinGeneator<T1>(SetTables, RData, COASqlJoinTypes.RIGHT, Oracle));
+            RData.Add(MainJoinGeneator<T1>(SetTables, RData, COASqlJoinTypes.RIGHT, DataBaseType));
             return RData;
         }
         public COASqlJoinData<T, T1, T2, T3> GenerateRightJoinQuery<T1, T2, T3>(Expression<Func<T1, T2, T3, object>> SetTables = null)
         {
             var RData = new COASqlJoinData<T, T1, T2, T3>();
-            RData.Add(MainJoinGeneator<T1>(SetTables, RData, COASqlJoinTypes.RIGHT, Oracle));
+            RData.Add(MainJoinGeneator<T1>(SetTables, RData, COASqlJoinTypes.RIGHT, DataBaseType));
             return RData;
         }
         public COASqlJoinData<T, T1, T2, T3, T4> GenerateRightJoinQuery<T1, T2, T3, T4>(Expression<Func<T1, T2, T3, T4, object>> SetTables = null)
         {
             var RData = new COASqlJoinData<T, T1, T2, T3, T4>();
-            RData.Add(MainJoinGeneator<T1>(SetTables, RData, COASqlJoinTypes.RIGHT, Oracle));
+            RData.Add(MainJoinGeneator<T1>(SetTables, RData, COASqlJoinTypes.RIGHT, DataBaseType));
             return RData;
         }
         public COASqlJoinData<T, T1, T2, T3, T4, T5> GenerateRightJoinQuery<T1, T2, T3, T4, T5>(Expression<Func<T1, T2, T3, T4, T5, object>> SetTables = null)
         {
             var RData = new COASqlJoinData<T, T1, T2, T3, T4, T5>();
-            RData.Add(MainJoinGeneator<T1>(SetTables, RData, COASqlJoinTypes.RIGHT, Oracle));
+            RData.Add(MainJoinGeneator<T1>(SetTables, RData, COASqlJoinTypes.RIGHT, DataBaseType));
             return RData;
         }
         public COASqlJoinData<T, T1, T2, T3, T4, T5, T6> GenerateRightJoinQuery<T1, T2, T3, T4, T5, T6>(Expression<Func<T1, T2, T3, T4, T5, T6, object>> SetTables = null)
         {
             var RData = new COASqlJoinData<T, T1, T2, T3, T4, T5, T6>();
-            RData.Add(MainJoinGeneator<T1>(SetTables, RData, COASqlJoinTypes.RIGHT, Oracle));
+            RData.Add(MainJoinGeneator<T1>(SetTables, RData, COASqlJoinTypes.RIGHT, DataBaseType));
             return RData;
         }
         public COASqlJoinData<T, T1, T2, T3, T4, T5, T6, T7> GenerateRightJoinQuery<T1, T2, T3, T4, T5, T6, T7>(Expression<Func<T1, T2, T3, T4, T5, T6, T7, object>> SetTables = null)
         {
             var RData = new COASqlJoinData<T, T1, T2, T3, T4, T5, T6, T7>();
-            RData.Add(MainJoinGeneator<T1>(SetTables, RData, COASqlJoinTypes.RIGHT, Oracle));
+            RData.Add(MainJoinGeneator<T1>(SetTables, RData, COASqlJoinTypes.RIGHT, DataBaseType));
             return RData;
         }
         public COASqlJoinData<T, T1, T2, T3, T4, T5, T6, T7, T8> GenerateRightJoinQuery<T1, T2, T3, T4, T5, T6, T7, T8>(Expression<Func<T1, T2, T3, T4, T5, T6, T7, T8, object>> SetTables)
         {
             var RData = new COASqlJoinData<T, T1, T2, T3, T4, T5, T6, T7, T8>();
-            RData.Add(MainJoinGeneator<T1>(SetTables, RData,COASqlJoinTypes.RIGHT, Oracle));
+            RData.Add(MainJoinGeneator<T1>(SetTables, RData,COASqlJoinTypes.RIGHT, DataBaseType));
             return RData;
         }
 
-        private COASqlJoinData<T> MainJoinGeneator<T1>(Expression SetTables, object obj,COASqlJoinTypes type=COASqlJoinTypes.INNER,bool oracle=false)
+        private COASqlJoinData<T> MainJoinGeneator<T1>(Expression SetTables, object obj,COASqlJoinTypes type=COASqlJoinTypes.INNER,COADataBaseTypes databasetype = COADataBaseTypes.Sql)
         {
             var returnData = new COASqlJoinData<T>();
-            returnData.Oracle = oracle;
+            returnData.DataBaseType = databasetype;
             returnData.TableName = TableName;
             returnData.SetJoinType(type);
             var Column1Selected = Types.GetAllTypes(SetTables);
@@ -327,7 +327,7 @@ namespace COASqlQuery
         /// </summary>
         public static COASqlSelectData<T> Where<T>(this COASqlSelectData<T> data, Expression<Func<T, bool>> Where)
         {
-            var str = Types.PredicateToString(Where, data.Oracle);
+            var str = Types.PredicateToString(Where, data.DataBaseType);
             data.SqlQuery += str;
             data.WhereQuery = str;
             data.Lenght = data.SqlQuery.Length;
@@ -358,7 +358,7 @@ namespace COASqlQuery
                 Ordrquery = data.OrderQuery;
             var str = "";
 
-            if (!data.Oracle)
+            if (data.DataBaseType== COADataBaseTypes.Sql)
             {
                 str = $"with dummyTable as (select ROW_NUMBER() over({Ordrquery}) as RowNumber,* from {data.TableName}{data.WhereQuery}) select top({take}) {SelectedColumns} from dummyTable";
                 if (take > 0)
@@ -419,7 +419,7 @@ namespace COASqlQuery
 
                 if (!colums.Equals(data.PrimaryKeyName))
                 {
-                    if (!data.Oracle)
+                    if (data.DataBaseType== COADataBaseTypes.Sql)
                         updateQuery.Append($"{colums}=@{colums},");
                     else
                         updateQuery.Append($"{colums}=:{colums},");
@@ -455,7 +455,7 @@ namespace COASqlQuery
                     {
                         if (!colums.Equals(selcomuns))
                         {
-                            if (!data.Oracle)
+                            if (data.DataBaseType == COADataBaseTypes.Sql)
                                 updateQuery.Append($"{colums}=@{colums},");
                             else
                                 updateQuery.Append($"{colums}=:{colums},");
@@ -610,49 +610,49 @@ namespace COASqlQuery
 
         public static COASqlEqualData<T, T1, T2> Where<T, T1, T2>(this COASqlEqualData<T, T1, T2> data, Expression<Func<T1, T2, bool>> where)
         {
-            var wherestr = Types.PredicateToString(where, data.Oracle, true);
+            var wherestr = Types.PredicateToString(where, data.DataBaseType, true);
             data.WhereQuery = wherestr;
             data.SqlQuery += wherestr;
             return data;
         }
         public static COASqlEqualData<T, T1, T2, T3> Where<T, T1, T2, T3>(this COASqlEqualData<T, T1, T2, T3> data, Expression<Func<T1, T2, T3, bool>> where)
         {
-            var wherestr = Types.PredicateToString(where, data.Oracle, true);
+            var wherestr = Types.PredicateToString(where, data.DataBaseType, true);
             data.WhereQuery = wherestr;
             data.SqlQuery += wherestr;
             return data;
         }
         public static COASqlEqualData<T, T1, T2, T3, T4> Where<T, T1, T2, T3, T4>(this COASqlEqualData<T, T1, T2, T3, T4> data, Expression<Func<T1, T2, T3, T4, bool>> where)
         {
-            var wherestr = Types.PredicateToString(where, data.Oracle);
+            var wherestr = Types.PredicateToString(where, data.DataBaseType);
             data.WhereQuery = wherestr;
             data.SqlQuery += wherestr;
             return data;
         }
         public static COASqlEqualData<T, T1, T2, T3, T4, T5> Where<T, T1, T2, T3, T4, T5>(this COASqlEqualData<T, T1, T2, T3, T4, T5> data, Expression<Func<T1, T2, T3, T4, T5, bool>> where)
         {
-            var wherestr = Types.PredicateToString(where, data.Oracle, true);
+            var wherestr = Types.PredicateToString(where, data.DataBaseType, true);
             data.WhereQuery = wherestr;
             data.SqlQuery += wherestr;
             return data;
         }
         public static COASqlEqualData<T, T1, T2, T3, T4, T5, T6> Where<T, T1, T2, T3, T4, T5, T6>(this COASqlEqualData<T, T1, T2, T3, T4, T5, T6> data, Expression<Func<T1, T2, T3, T4, T5, T6, bool>> where)
         {
-            var wherestr = Types.PredicateToString(where, data.Oracle, true);
+            var wherestr = Types.PredicateToString(where, data.DataBaseType, true);
             data.WhereQuery = wherestr;
             data.SqlQuery += wherestr;
             return data;
         }
         public static COASqlEqualData<T, T1, T2, T3, T4, T5, T6, T7> Where<T, T1, T2, T3, T4, T5, T6, T7>(this COASqlEqualData<T, T1, T2, T3, T4, T5, T6, T7> data, Expression<Func<T1, T2, T3, T4, T5, T6, T7, bool>> where)
         {
-            var wherestr = Types.PredicateToString(where, data.Oracle, true);
+            var wherestr = Types.PredicateToString(where, data.DataBaseType, true);
             data.WhereQuery = wherestr;
             data.SqlQuery += wherestr;
             return data;
         }
         public static COASqlEqualData<T, T1, T2, T3, T4, T5, T6, T7, T8> Where<T, T1, T2, T3, T4, T5, T6, T7, T8>(this COASqlEqualData<T, T1, T2, T3, T4, T5, T6, T7, T8> data, Expression<Func<T1, T2, T3, T4, T5, T6, T7, T8, bool>> where)
         {
-            var wherestr = Types.PredicateToString(where, data.Oracle);
+            var wherestr = Types.PredicateToString(where, data.DataBaseType);
             data.WhereQuery = wherestr;
             data.SqlQuery += wherestr;
             return data;

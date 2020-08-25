@@ -19,7 +19,7 @@ namespace COASqlQuery
             this.JoinQuery = a.JoinQuery;
             this.SqlQuery = a.SqlQuery;
             this.Lenght = a.SqlQuery.Length;
-            this.Oracle = a.Oracle;
+            this.DataBaseType = a.DataBaseType;
             this.OrderQuery = a.OrderQuery;
             this.PrimaryKeyName = a.PrimaryKeyName;
             this.SelectedColumns = a.SelectedColumns;

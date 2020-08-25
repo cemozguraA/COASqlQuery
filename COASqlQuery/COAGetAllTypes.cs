@@ -26,7 +26,7 @@ namespace COASqlQuery
         }
 
 
-        public string PredicateToString(Expression predicate, bool Oracle,bool join = false)
+        public string PredicateToString(Expression predicate, COADataBaseTypes databasetype,bool join = false)
         {
 
             var Query = GetAllTypes(predicate);
@@ -37,7 +37,7 @@ namespace COASqlQuery
                 if (Query.Type[i] == typeof(DateTime))
                 {
                     var date = Convert.ToDateTime(Query.Value[i]);
-                    if (Oracle)
+                    if (databasetype == COADataBaseTypes.Oracle)
                     {
                         if (date.Hour >= 1)
                             Query.Value[i] = "TO_DATE('" + date.ToString("yyyy-MM-dd HH:mm:ss") + "', 'YYYY/MM/DD HH:MI:SS')";
