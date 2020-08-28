@@ -25,7 +25,7 @@ COASqlQuery.COASqlQuery<TData>() strQuery = new COASqlQuery.COASqlQuery<TData>("
 | Property  | What it does |
 | ------------- | ------------|
 | PrimaryKeyName  | Set your primarykey to not any changes.|
-| Oracle  | If your datatable is oracle set this property true|
+| DataBaseType  | If your datatable is oracle set this property Oracle (defualt SQL)|
 
 # Methods
 
