@@ -48,41 +48,59 @@ namespace COASqlQuery
             return new COASqlData<T>() { SqlQuery = str, Lenght = str.Length, TableName = tableName, DataBaseType = DataBaseType, PrimaryKeyName = PrimaryKeyName, WhereQuery = wherestring };
         }
         COAGetAllTypes Types = new COAGetAllTypes();
-        public COASqlSelectData<T> GenerateSelectQuery(Expression<Func<T, object>> select = null)
+
+        public COASqlSelectData<T> GenerateSelectQuery()
+        {
+            return selectQuery("*", Types.GenerateListOfProperties(GetProperties));
+        }
+        public COASqlSelectData<T> GenerateSelectQuery(Expression<Func<T, object>> select)
+        {
+            List<string> SelectList = new List<string>();
+
+
+            string selectStr = "";
+            var ForeachSorgu = Types.GetAllTypes(select);
+            ForeachSorgu.Name.ForEach(row =>
+            {
+                selectStr += row + ",";
+                SelectList.Add(row);
+            });
+            selectStr = selectStr.Remove(selectStr.Length - 1, 1);
+
+            return selectQuery(selectStr, SelectList);
+
+        }
+        private COASqlSelectData<T> selectQuery(string selectStr, List<string> SelectList)
         {
 
-            var SelectList = new List<string>();
-            string selectStr = "";
-            if (select != null)
-            {
-                var ForeachSorgu = Types.GetAllTypes(select);
-                ForeachSorgu.Name.ForEach(row =>
-                {
-                    selectStr += row + ",";
-                    SelectList.Add(row);
-                });
-                selectStr = selectStr.Remove(selectStr.Length - 1, 1);
-
-            }
-            else
-                selectStr = "*";
             var str = $"SELECT {selectStr} FROM {tableName}";
-
             return new COASqlSelectData<T>() { SqlQuery = str, Lenght = str.Length, TableName = tableName, DataBaseType = DataBaseType, PrimaryKeyName = PrimaryKeyName, SelectedColumns = SelectList };
-        }
 
+        }
         public COASqlData<T> GenerateInsertQuery()
         {
+            return InsertQuery(Types.GenerateListOfProperties(GetProperties));
+        }
+
+        public COASqlData<T> GenerateInsertQuery(Expression<Func<T, object>> select = null)
+        {
+
+            var list = new COAGetAllTypes().GetAllTypes(select);
+            return InsertQuery(list.Name);
+        }
+
+        private COASqlData<T> InsertQuery(List<string> lst)
+        {
+
             var insertQuery = new StringBuilder($"INSERT INTO {tableName} ");
             insertQuery.Append("(");
-            var properties = Types.GenerateListOfProperties(GetProperties);
-            properties.ForEach(prop => { if (prop != PrimaryKeyName) insertQuery.Append($"[{prop}],"); });
+            lst.ForEach(prop => { if (prop != PrimaryKeyName) insertQuery.Append($"[{prop}],"); });
 
             insertQuery
                 .Remove(insertQuery.Length - 1, 1)
                 .Append(") VALUES (");
 
-            properties.ForEach(prop =>
+            lst.ForEach(prop =>
             {
                 if (prop != PrimaryKeyName)
                 {
@@ -100,6 +118,7 @@ namespace COASqlQuery
 
             return new COASqlData<T>() { SqlQuery = insertQuery.ToString(), Lenght = insertQuery.ToString().Length, TableName = tableName, DataBaseType = DataBaseType, PrimaryKeyName = PrimaryKeyName };
         }
+
         public COASqlUpdateData<T> GenerateUpdateQuery(Expression<Func<T, bool>> where)
         {
             var SelectedList = new List<string>();
@@ -128,7 +147,7 @@ namespace COASqlQuery
         public COASqlJoinData<T, T1, T2> GenerateJoinQuery<T1, T2>(Expression<Func<T1, T2, object>> SetTables = null)
         {
             var RData = new COASqlJoinData<T, T1, T2>();
-            RData.Add(MainJoinGeneator<T1>(SetTables, RData,databasetype:DataBaseType));
+            RData.Add(MainJoinGeneator<T1>(SetTables, RData, databasetype: DataBaseType));
             return RData;
         }
         public COASqlJoinData<T, T1, T2, T3> GenerateJoinQuery<T1, T2, T3>(Expression<Func<T1, T2, T3, object>> SetTables = null)
@@ -177,7 +196,7 @@ namespace COASqlQuery
         public COASqlJoinData<T, T1, T2, T3> GenerateLeftJoinQuery<T1, T2, T3>(Expression<Func<T1, T2, T3, object>> SetTables = null)
         {
             var RData = new COASqlJoinData<T, T1, T2, T3>();
-            RData.Add(MainJoinGeneator<T1>(SetTables, RData, COASqlJoinTypes.LEFT,DataBaseType));
+            RData.Add(MainJoinGeneator<T1>(SetTables, RData, COASqlJoinTypes.LEFT, DataBaseType));
             return RData;
         }
         public COASqlJoinData<T, T1, T2, T3, T4> GenerateLeftJoinQuery<T1, T2, T3, T4>(Expression<Func<T1, T2, T3, T4, object>> SetTables = null)
@@ -252,11 +271,11 @@ namespace COASqlQuery
         public COASqlJoinData<T, T1, T2, T3, T4, T5, T6, T7, T8> GenerateRightJoinQuery<T1, T2, T3, T4, T5, T6, T7, T8>(Expression<Func<T1, T2, T3, T4, T5, T6, T7, T8, object>> SetTables)
         {
             var RData = new COASqlJoinData<T, T1, T2, T3, T4, T5, T6, T7, T8>();
-            RData.Add(MainJoinGeneator<T1>(SetTables, RData,COASqlJoinTypes.RIGHT, DataBaseType));
+            RData.Add(MainJoinGeneator<T1>(SetTables, RData, COASqlJoinTypes.RIGHT, DataBaseType));
             return RData;
         }
 
-        private COASqlJoinData<T> MainJoinGeneator<T1>(Expression SetTables, object obj,COASqlJoinTypes type=COASqlJoinTypes.INNER,COADataBaseTypes databasetype = COADataBaseTypes.Sql)
+        private COASqlJoinData<T> MainJoinGeneator<T1>(Expression SetTables, object obj, COASqlJoinTypes type = COASqlJoinTypes.INNER, COADataBaseTypes databasetype = COADataBaseTypes.Sql)
         {
             var returnData = new COASqlJoinData<T>();
             returnData.DataBaseType = databasetype;
@@ -358,7 +377,7 @@ namespace COASqlQuery
                 Ordrquery = data.OrderQuery;
             var str = "";
 
-            if (data.DataBaseType== COADataBaseTypes.Sql)
+            if (data.DataBaseType == COADataBaseTypes.Sql)
             {
                 str = $"with dummyTable as (select ROW_NUMBER() over({Ordrquery}) as RowNumber,* from {data.TableName}{data.WhereQuery}) select top({take}) {SelectedColumns} from dummyTable";
                 if (take > 0)
@@ -398,7 +417,7 @@ namespace COASqlQuery
                     default:
                         break;
                 }
-             
+
             }
 
             return list;
@@ -419,7 +438,7 @@ namespace COASqlQuery
 
                 if (!colums.Equals(data.PrimaryKeyName))
                 {
-                    if (data.DataBaseType== COADataBaseTypes.Sql)
+                    if (data.DataBaseType == COADataBaseTypes.Sql)
                         updateQuery.Append($"{colums}=@{colums},");
                     else
                         updateQuery.Append($"{colums}=:{colums},");
